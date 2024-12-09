@@ -29,7 +29,7 @@ export const premiumPackageSchema = z.object({
 
 // **4. Swipe Validation Schema**
 export const swipeSchema = z.object({
-  swiper_id: z.string().uuid('Invalid swiper user ID'),
+  swiper_id: z.string().uuid('Invalid swiper user ID').optional(),
   swiped_user_id: z.string().uuid('Invalid swiped user ID'),
   swipe_type: z.enum(['LIKE', 'PASS']),
 });
