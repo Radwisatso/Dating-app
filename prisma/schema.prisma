@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String   @id @default(uuid())
+  email                String   @unique
+  password             String
+  name                 String
+  gender               String
+  date_of_birth        DateTime
+  is_premium           Boolean  @default(false)
+  verified             Boolean  @default(false)
+
+  profile              Profile?
+  swipes_given         Swipe[]  @relation("SwipesGiven")
+  swipes_received      Swipe[]  @relation("SwipesReceived")
+  premium_subscriptions UserPremiumSubscription[]
+  daily_limit          DailyLimit?
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+
+  @@map("users") // Plural table name
+}
+
+model Profile {
+  id          String   @id @default(uuid())
+  bio         String
+  photo_url   String
+  user_id     String   @unique
+  user        User     @relation(fields: [user_id], references: [id])
+
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@map("profiles") // Plural table name
+}
+
+model Swipe {
+  id            String   @id @default(uuid())
+  swiper_id     String
+  swiped_user_id String
+  swipe_type    SwipeType
+  swiped_at     DateTime @default(now())
+
+  swiper        User     @relation("SwipesGiven", fields: [swiper_id], references: [id])
+  swiped_user   User     @relation("SwipesReceived", fields: [swiped_user_id], references: [id])
+
+  @@map("swipes") // Plural table name
+}
+
+model PremiumPackage {
+  id           String   @id @default(uuid())
+  name         String
+  description  String
+  price        Float
+
+  subscriptions UserPremiumSubscription[]
+
+  @@map("premium_packages") // Plural table name
+}
+
+model UserPremiumSubscription {
+  id               String   @id @default(uuid())
+  user_id          String
+  premium_package_id String
+  start_date       DateTime
+  end_date         DateTime
+
+  user             User           @relation(fields: [user_id], references: [id])
+  premium_package  PremiumPackage @relation(fields: [premium_package_id], references: [id])
+
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  @@map("user_premium_subscriptions") // Plural table name
+}
+
+model DailyLimit {
+  id          String   @id @default(uuid())
+  user_id     String   @unique
+  date        DateTime
+  swipe_count Int      @default(0)
+
+  user        User     @relation(fields: [user_id], references: [id])
+
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@map("daily_limits") // Plural table name
+}
+
+enum SwipeType {
+  LIKE
+  PASS
+}
