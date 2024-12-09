@@ -55,3 +55,9 @@ export const dailyLimitSchema = z.object({
   swipe_count: z.number().min(0, 'Swipe count cannot be negative'),
 });
 
+// **7. Login Schema**
+export const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string()
+});
+
