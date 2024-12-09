@@ -18,6 +18,9 @@ This is the backend API for a dating app that mimics the core functionality of a
 - **Validation**: Zod (for input validation)
 - **Cron Jobs**: `cron` package for daily limit resets
 
+## Entity Relation Diagram (ERD)
+[Click here](https://dbdiagram.io/d/6717573b97a66db9a3d27a01)
+
 ## Setup and Installation
 
 ### Prerequisites
