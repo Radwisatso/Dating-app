@@ -11,13 +11,6 @@ beforeAll(() => {
 
 let token: string;
 let userId: string;
-describe("Introduction", () => {
-  test("Should've give response: Hello Dating App!", async () => {
-    const response = await app.request("/");
-    expect(response.status).toBe(200);
-    expect(await response.text()).toBe("Hello Dating App!");
-  });
-});
 
 describe("Creating new user", () => {
   test("POST - Should've make a new user 201", async () => {

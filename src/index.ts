@@ -31,7 +31,7 @@ new CronJob(
     try {
       await prisma.dailyLimit.updateMany({
         data: {
-          swipe_count: 0, 
+          swipe_count: 0,
         },
       });
       console.log("Daily swipe limits have been reset.");
@@ -45,7 +45,105 @@ new CronJob(
 );
 
 app.get("/", (c) => {
-  return c.text("Hello Dating App!");
+  return c.json({
+    message: "Welcome to the Dating App API!",
+    endpoints: [
+      {
+        method: "POST",
+        url: "/users",
+        description: "Register a new user.",
+        request_body: {
+          email: "string",
+          password: "string",
+          name: "string",
+          gender: "string",
+          date_of_birth: "string",
+        },
+        response: {
+          status: 201,
+          body: "User data (ID, name, email, etc.)",
+        },
+      },
+      {
+        method: "POST",
+        url: "/login",
+        description: "Login an existing user and get a JWT token.",
+        request_body: {
+          email: "string",
+          password: "string",
+        },
+        response: {
+          status: 200,
+          body: {
+            token: "string",
+          },
+        },
+      },
+      {
+        method: "POST",
+        url: "/auth/swipes",
+        description:
+          "Swipe on another user (LIKE/PASS). Requires authentication.",
+        request_body: {
+          swiped_user_id: "string",
+          swipe_type: "string", // "LIKE" or "PASS"
+        },
+        response: {
+          status: 200,
+          body: {
+            success: true,
+          },
+        },
+      },
+      {
+        method: "POST",
+        url: "/auth/subscriptions",
+        description: "Subscribe to a premium package. Requires authentication.",
+        request_body: {
+          premium_package_id: "string",
+        },
+        response: {
+          status: 201,
+          body: "Subscription data",
+        },
+      },
+      {
+        method: "GET",
+        url: "/auth/subscriptions",
+        description: "Get the active subscription of the logged-in user.",
+        response: {
+          status: 200,
+          body: {
+            subscription: {
+              premium_package: "string",
+              start_date: "string",
+              end_date: "string",
+            },
+          },
+        },
+      },
+      {
+        method: "GET",
+        url: "/auth/matches",
+        description: "Get all mutual swipes (matches) for the logged-in user.",
+        response: {
+          status: 200,
+          body: {
+            matches: [
+              {
+                id: "string",
+                name: "string",
+                gender: "string",
+                date_of_birth: "string",
+                bio: "string",
+                photo_url: "string",
+              },
+            ],
+          },
+        },
+      },
+    ],
+  });
 });
 
 // ** Create new user (register)
@@ -305,7 +403,7 @@ app.get("/auth/subscriptions", async (c) => {
 
 // ** Get matches by user logged in
 app.get("/auth/matches", async (c) => {
-  const user = c.get('user')
+  const user = c.get("user");
 
   try {
     // Fetch mutual "LIKE" swipes
@@ -317,11 +415,11 @@ app.get("/auth/matches", async (c) => {
           swipes_given: {
             some: {
               swiped_user_id: user.userId,
-              swipe_type: "LIKE"
-            }
-          }
-        }
-      }, 
+              swipe_type: "LIKE",
+            },
+          },
+        },
+      },
       select: {
         swiped_user: {
           select: {
@@ -329,24 +427,24 @@ app.get("/auth/matches", async (c) => {
             name: true,
             gender: true,
             date_of_birth: true,
-          }
-        }
-      }
-    })
+          },
+        },
+      },
+    });
     // Format the response
     const formattedMatches = matches.map((match) => ({
       id: match.swiped_user.id,
       name: match.swiped_user.name,
       gender: match.swiped_user.gender,
       date_of_birth: match.swiped_user.date_of_birth,
-      bio: '',
-      photo_url: '',
+      bio: "",
+      photo_url: "",
     }));
-    
+
     return c.json({ matches: formattedMatches });
   } catch (error) {
     return c.json({ error: "Internal server error" }, 500);
   }
-})
+});
 
 export default app;
