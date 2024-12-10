@@ -2,7 +2,7 @@
 
 **_Please read this: After the link is clicked, please wait about 1 minute for the server to wake up_**
 
- _Deployment link: https://dating-app-k3gc.onrender.com/_
+ _Deployment link: [https://dating-app-k3gc.onrender.com/](https://dating-app-k3gc.onrender.com/)_
 
 
 This is the backend API for a dating app that mimics the core functionality of apps like Tinder and Bumble. It includes features for user sign-up, login, swiping, premium packages, daily swipe limits, and more.
