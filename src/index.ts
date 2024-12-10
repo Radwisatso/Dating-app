@@ -73,10 +73,9 @@ app.post("/users", async (c) => {
       data: validatedData.data,
     });
 
-    return c.json(newUser);
+    return c.json(newUser, 201);
   } catch (e) {
-    // Handle other errors (e.g., database errors)
-    return c.json({ error: "Internal server error" }, 500);
+    return c.json({ error: e }, 500);
   }
 });
 
@@ -97,7 +96,7 @@ app.post("/login", async (c) => {
       where: { email },
     });
     if (!user) {
-      return c.json({ error: "User not found" }, 404);
+      return c.json({ error: "Invalid email/password" }, 401);
     }
 
     const isPasswordValid = compareSync(password, user.password);
@@ -306,7 +305,7 @@ app.get("/auth/subscriptions", async (c) => {
   }
 });
 
-// Matches
+// Get Matches
 app.get("/auth/matches", async (c) => {
   const user = c.get('user')
 
