@@ -22,6 +22,9 @@ This is the backend API for a dating app that mimics the core functionality of a
 - **Authentication**: JWT (JSON Web Tokens)
 - **Validation**: Zod (for input validation)
 - **Cron Jobs**: `cron` package for daily limit resets
+- **Containerization**: Docker
+- **Server Deployment**: [Render](https://render.com) (for simple serverless deployment)
+- **Database Deployment**: [Neon](https://neon.tech)
 
 ## Entity Relation Diagram (ERD)
 
