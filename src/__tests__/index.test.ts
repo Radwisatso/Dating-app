@@ -1,4 +1,4 @@
-import { test, describe, expect, beforeAll, afterAll } from "@jest/globals";
+import { test, describe, expect, beforeAll } from "@jest/globals";
 import app from "..";
 import { execSync } from "child_process";
 import { PrismaClient } from "@prisma/client";
