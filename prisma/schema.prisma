@@ -19,7 +19,7 @@ model User {
   password             String
   name                 String
   gender               String
-  date_of_birth        DateTime
+  date_of_birth        DateTime @db.Date
   is_premium           Boolean  @default(false)
   verified             Boolean  @default(false)
 
@@ -52,7 +52,7 @@ model Swipe {
   swiper_id     String
   swiped_user_id String
   swipe_type    SwipeType
-  swiped_at     DateTime @default(now())
+  swiped_at     DateTime @default(now()) @db.Date
 
   swiper        User     @relation("SwipesGiven", fields: [swiper_id], references: [id])
   swiped_user   User     @relation("SwipesReceived", fields: [swiped_user_id], references: [id])
@@ -90,7 +90,7 @@ model UserPremiumSubscription {
 model DailyLimit {
   id          String   @id @default(uuid())
   user_id     String   @unique
-  date        DateTime
+  date        DateTime @db.Date
   swipe_count Int      @default(0)
 
   user        User     @relation(fields: [user_id], references: [id])
