@@ -3,15 +3,21 @@ import { CronJob } from "cron";
 import { PrismaClient } from "@prisma/client";
 import { compareSync, hashSync } from "bcrypt";
 import jwt from "jsonwebtoken";
-import { loginSchema, swipeSchema, userSchema } from "./schemas";
+import {
+  loginSchema,
+  swipeSchema,
+  userPremiumSubscriptionSchema,
+  userSchema,
+} from "./schemas";
 import { authentication } from "./authentication";
-import { endOfDay, startOfDay } from "date-fns";
+import { addMonths, endOfDay, startOfDay } from "date-fns";
 
 type Variables = {
   user: {
     userId: string;
     email: string;
     iat: number;
+    is_premium: boolean;
   };
 };
 
@@ -141,8 +147,8 @@ app.post("/auth/swipes", async (c) => {
     );
   }
   try {
-    const today = startOfDay(new Date())
-    const endDay = endOfDay(new Date())
+    const today = startOfDay(new Date());
+    const endDay = endOfDay(new Date());
 
     // Check if user meet the same other user twice
     const existingSwipe = await prisma.swipe.findFirst({
@@ -151,7 +157,7 @@ app.post("/auth/swipes", async (c) => {
         swiped_user_id: swiped_user_id,
         swiped_at: {
           gte: today,
-          lte: endDay
+          lte: endDay,
         },
       },
     });
@@ -169,13 +175,13 @@ app.post("/auth/swipes", async (c) => {
         user_id: user.userId,
         date: {
           gte: today,
-          lte: endDay
+          lte: endDay,
         },
       },
     });
 
     // Check if user has reached swipe limit
-    if (dailyLimit && dailyLimit.swipe_count >= 10) {
+    if (dailyLimit && dailyLimit.swipe_count >= 10 && !user.is_premium) {
       return c.json(
         {
           error: "You have reached your daily swipe limit",
@@ -213,6 +219,89 @@ app.post("/auth/swipes", async (c) => {
     return c.json({ success: true });
   } catch (error) {
     console.log(error);
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
+
+// Premium Subscriptions
+app.post("/auth/subscriptions", async (c) => {
+  const user = c.get("user");
+  const body = await c.req.json();
+
+  const validatedData = userPremiumSubscriptionSchema.safeParse(body);
+  if (!validatedData.success) {
+    return c.json({ error: validatedData.error.errors }, 400);
+  }
+
+  const { premium_package_id } = validatedData.data;
+
+  try {
+    const today = startOfDay(new Date());
+    const nextMonth = addMonths(today, 1);
+
+    const existingSubscription = await prisma.userPremiumSubscription.findFirst(
+      {
+        where: {
+          user_id: user.userId,
+          end_date: { gte: today },
+        },
+      }
+    );
+
+    if (existingSubscription) {
+      return c.json({ error: "User already has an active subscription" }, 400);
+    }
+
+    // Create the subscription
+    const newSubscription = await prisma.userPremiumSubscription.create({
+      data: {
+        user_id: user.userId,
+        premium_package_id,
+        start_date: today,
+        end_date: nextMonth,
+      },
+    });
+
+    // Update is_premium user status
+    await prisma.user.update({
+      where: {
+        id: user.userId,
+      },
+      data: {
+        is_premium: true,
+      },
+    });
+
+    return c.json(newSubscription, 201);
+  } catch (error) {
+    console.error(error);
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
+
+// Get Subscriptions
+app.get("/auth/subscriptions", async (c) => {
+  const user = c.get("user"); // Get user info from authentication middleware
+
+  try {
+    const today = startOfDay(new Date());
+
+    // Fetch user's active subscription
+    const subscription = await prisma.userPremiumSubscription.findFirst({
+      where: {
+        user_id: user.userId,
+        end_date: { gte: today },
+      },
+      include: { premium_package: true },
+    });
+
+    if (!subscription) {
+      return c.json({ error: "No active subscription found" }, 404);
+    }
+
+    return c.json(subscription);
+  } catch (error) {
+    console.error(error);
     return c.json({ error: "Internal server error" }, 500);
   }
 });

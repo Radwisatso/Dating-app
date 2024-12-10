@@ -36,14 +36,8 @@ export const swipeSchema = z.object({
 
 // **5. User Premium Subscription Validation Schema**
 export const userPremiumSubscriptionSchema = z.object({
-  user_id: z.string().uuid('Invalid user ID'),
+  user_id: z.string().uuid('Invalid user ID').optional(),
   premium_package_id: z.string().uuid('Invalid premium package ID'),
-  start_date: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message: 'Invalid start date format',
-  }),
-  end_date: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message: 'Invalid end date format',
-  }),
 });
 
 // **6. Daily Limit Validation Schema**
