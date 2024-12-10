@@ -306,4 +306,50 @@ app.get("/auth/subscriptions", async (c) => {
   }
 });
 
+// Matches
+app.get("/auth/matches", async (c) => {
+  const user = c.get('user')
+
+  try {
+    // Fetch mutual "LIKE" swipes
+    const matches = await prisma.swipe.findMany({
+      where: {
+        swiper_id: user.userId,
+        swipe_type: "LIKE",
+        swiped_user: {
+          swipes_given: {
+            some: {
+              swiped_user_id: user.userId,
+              swipe_type: "LIKE"
+            }
+          }
+        }
+      }, 
+      select: {
+        swiped_user: {
+          select: {
+            id: true,
+            name: true,
+            gender: true,
+            date_of_birth: true,
+          }
+        }
+      }
+    })
+    // Format the response
+    const formattedMatches = matches.map((match) => ({
+      id: match.swiped_user.id,
+      name: match.swiped_user.name,
+      gender: match.swiped_user.gender,
+      date_of_birth: match.swiped_user.date_of_birth,
+      bio: '',
+      photo_url: '',
+    }));
+    
+    return c.json({ matches: formattedMatches });
+  } catch (error) {
+    return c.json({ error: "Internal server error" }, 500);
+  }
+})
+
 export default app;

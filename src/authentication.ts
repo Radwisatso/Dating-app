@@ -25,7 +25,7 @@ export const authentication = async (c: Context, next: () => Promise<void>) => {
             }
         })
         if (!foundUser) {
-            return c.json({ error: 'User not found' }, 404)
+            return c.json({ error: 'Authentication - User not found' }, 404)
         }
         decoded.is_premium = foundUser.is_premium
         c.set('user', decoded)
