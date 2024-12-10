@@ -24,16 +24,14 @@ type Variables = {
 const prisma = new PrismaClient();
 const app = new Hono<{ Variables: Variables }>();
 
-// Cron Job
-// Start the cron job
-const job = new CronJob(
+// ** CronJob - Reset swipe_count daily limit records to 0
+new CronJob(
   "0 0 * * *",
   async () => {
     try {
-      // Update all daily limit records to reset swipe_count to 0
       await prisma.dailyLimit.updateMany({
         data: {
-          swipe_count: 0, // Reset daily swipe count
+          swipe_count: 0, 
         },
       });
       console.log("Daily swipe limits have been reset.");
@@ -50,7 +48,7 @@ app.get("/", (c) => {
   return c.text("Hello Dating App!");
 });
 
-// Sign Up User
+// ** Create new user (register)
 app.post("/users", async (c) => {
   const data = await c.req.json();
 
@@ -79,7 +77,7 @@ app.post("/users", async (c) => {
   }
 });
 
-// Login User
+// ** Login user
 app.post("/login", async (c) => {
   const body = await c.req.json();
 
@@ -118,10 +116,10 @@ app.post("/login", async (c) => {
   }
 });
 
-// Authentication
+// ** Auth middleware
 app.use("/auth/*", authentication);
 
-// Swipes Feature
+// ** Swipes user (main feature)
 app.post("/auth/swipes", async (c) => {
   const user = c.get("user");
 
@@ -222,7 +220,7 @@ app.post("/auth/swipes", async (c) => {
   }
 });
 
-// Premium Subscriptions
+// ** Premium subscriptions
 app.post("/auth/subscriptions", async (c) => {
   const user = c.get("user");
   const body = await c.req.json();
@@ -278,7 +276,7 @@ app.post("/auth/subscriptions", async (c) => {
   }
 });
 
-// Get Subscriptions
+// ** Get subscriptions by user logged in
 app.get("/auth/subscriptions", async (c) => {
   const user = c.get("user"); // Get user info from authentication middleware
 
@@ -305,7 +303,7 @@ app.get("/auth/subscriptions", async (c) => {
   }
 });
 
-// Get Matches
+// ** Get matches by user logged in
 app.get("/auth/matches", async (c) => {
   const user = c.get('user')
 
