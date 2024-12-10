@@ -8,7 +8,7 @@ This is the backend API for a dating app that mimics the core functionality of a
 - **User Profile**: Users can manage their profile, including adding a bio and photo. (coming soon)
 - **Swiping**: Users can swipe on other profiles (like or pass).
 - **Daily Swipe Limits**: Users are limited to 10 swipes (likes or passes) per day, which resets every midnight.
-- **Premium Packages**: Users can purchase premium packages to unlock additional features such as no swipe limit or verified profile status. (coming soon)
+- **Premium Packages**: Users can purchase premium packages to unlock additional features such as no swipe limit or verified profile status.
 
 ## Tech Stack
 
